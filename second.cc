@@ -26,7 +26,7 @@ int
 main(int argc, char* argv[])
 {
     bool verbose = true;
-    uint32_t nCsma = 3;
+    uint32_t nCsma = 8;
 
     CommandLine cmd(__FILE__);
     cmd.AddValue("nCsma", "Number of \"extra\" CSMA nodes/devices", nCsma);
@@ -76,7 +76,7 @@ main(int argc, char* argv[])
     Ipv4InterfaceContainer csmaInterfaces;
     csmaInterfaces = address.Assign(csmaDevices);
 
-    UdpEchoServerHelper echoServer(9);
+    UdpEchoServerHelper echoServer(7);
 
     ApplicationContainer serverApps = echoServer.Install(csmaNodes.Get(nCsma));
     serverApps.Start(Seconds(1.0));
@@ -90,6 +90,26 @@ main(int argc, char* argv[])
     ApplicationContainer clientApps = echoClient.Install(p2pNodes.Get(0));
     clientApps.Start(Seconds(2.0));
     clientApps.Stop(Seconds(10.0));
+
+    UdpEchoClientHelper echoClient1 (p2pInterfaces.GetAddress (0), 7);
+    echoClient1.SetAttribute ("MaxPackets", UintegerValue (1));
+    echoClient1.SetAttribute ("Interval", TimeValue (Seconds (2.0)));
+    echoClient1.SetAttribute ("PacketSize", UintegerValue (1024));
+
+    ApplicationContainer clientApps1 = echoClient1.Install(p2pNodes.Get(0));
+    clientApps.Start(Seconds(2.0));
+    clientApps.Stop(Seconds(25.0));
+
+    UdpEchoClientHelper echoClient2 (p2pInterfaces.GetAddress (0), 7);
+    echoClient2.SetAttribute ("MaxPackets", UintegerValue (1));
+    echoClient2.SetAttribute ("Interval", TimeValue (Seconds (2.0)));
+    echoClient2.SetAttribute ("PacketSize", UintegerValue (2048));
+
+    ApplicationContainer clientApps2 = echoClient2.Install(p2pNodes.Get(0));
+    clientApps.Start(Seconds(8.0));
+    clientApps.Stop(Seconds(25.0));
+
+    
 
     Ipv4GlobalRoutingHelper::PopulateRoutingTables();
 
